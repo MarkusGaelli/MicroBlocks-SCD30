@@ -1,23 +1,7 @@
-module scd30V1Final
-author 'Markus Gälli'
+module scd30
+author Markus
 version 1 0 
-tags scd30 CO2 sensor sensirion 
-description 'Implements the interface of the SCD30 environmental sensor in MicroBlocks according to 
-https://www.sensirion.com/fileadmin/user_upload/customers/sensirion/Dokumente/9.5_CO2/Sensirion_CO2_Sensors_SCD30_Interface_Description.pdf
-
-Allows the user to measure
-- CO2 in ppm
-- temperature in °C
-- humidity in %.
-
-The measurement interval can be set in seconds >=2s.
-SCD30 can be asked if it could provide a new measurement, if yes it can read all values into the respective variables provided (CO2, temperature, humidity).
-
-The device can be triggered to calibrate its CO2 measurement.
-The CO2 measurement can be adjusted by ambient air pressure or altitude.
-The temperature measurement can be adjusted by a temperature offset as the device creates its own heat.
-
-'
+description ''
 variables temperature humidity co2 
 
 	spec 'r' 'perform' 'SCD30 send _ read _' 'auto auto' '10' 10
@@ -26,7 +10,7 @@ variables temperature humidity co2
 	spec ' ' 'SCD30 Read Loop' 'SCD30 read loop'
 	spec 'r' 'SCD30 isReady?' 'SCD30 isReady?'
 	spec 'r' 'SGC30 generate CRC' 'generate CRC _' 'auto' 1
-	spec 'r' 'SCD Firmware' 'SCD30 firmware'
+	spec 'r' 'SCD30 Firmware' 'SCD30 firmware'
 	spec 'r' 'SCD30 Check CRC' 'SCD30 check CRC _' 'auto' '10'
 	spec 'r' 'SCD30 Get Automatic Self-Calibration Status' 'SCD30 is calibrating?'
 	spec 'r' 'SCD30 Read Measurement Interval' 'SCD30 measurement interval'
@@ -35,17 +19,18 @@ variables temperature humidity co2
 	spec ' ' 'SCD30 Stop Continous Measurement' 'SCD30 stop measuring'
 	spec ' ' 'SCD30 Stop Self-Calibrating' 'SCD30 stop calibrating'
 	spec ' ' 'SCD30 Trigger Continous Measurement' 'SCD30 start measuring with ambient pressure _' 'auto' ''
-	spec 'r' 'SCD30 altitude compensation' 'SCD30 altitude compensation'
 	spec ' ' 'SCD30 force recalibration value' 'SCD30 force recalibration value _' 'auto' '10'
 	spec 'r' 'SCD30 forced recalibration value' 'SCD30 forced recalibration value'
 	spec ' ' 'SCD30 send' 'SCD30 send _ with _' 'auto auto' '' ''
-	spec ' ' 'SCD30 set altitude compensation' 'SCD30 set altitude compensation _' 'auto' '10'
 	spec ' ' 'SCD30 set temperture offset' 'SCD30 set temperture offset _' 'auto' '10'
 	spec ' ' 'SCD30 soft reset' 'SCD30 soft reset'
 	spec ' ' 'SCD30 start measuring' 'SCD30 start measuring'
 	spec 'r' 'SCD30 temperature offset' 'SCD30 temperature offset'
+	spec ' ' 'SCD30 set altitude compensation' 'SCD30 set altitude compensation _' 'auto' '10'
+	spec 'r' 'SCD30 altitude compensation' 'SCD30 altitude compensation'
+	spec ' ' 'SCD30 soft reset' 'SCD30 soft reset'
 
-to 'SCD Firmware' {
+to 'SCD30 Firmware' {
   return (perform (hexToInt 'D100') 2)
 }
 
@@ -71,11 +56,11 @@ to 'SCD30 Get Automatic Self-Calibration Status' {
 
 to 'SCD30 Read Loop' {
   'SCD30 Trigger Continous Measurement' 1006
-  'SCD30 Set Measurement Interval' 3
+  'SCD30 Set Measurement Interval' 2
   forever {
     waitUntil ('SCD30 isReady?')
     'SCD30 Read Measurement'
-    sayIt ('[data:join]' 'CO2:' co2 'ppm, Temp:' temperature '°C, Humidity:' humidity '%')
+    sayIt ('[data:join]' 'CO2:' co2 ', Temp:' temperature ', Humidity:' humidity)
   }
 }
 
@@ -121,16 +106,22 @@ to 'SCD30 Trigger Continous Measurement' mbar {
   'SCD30 send' (hexToInt '0010') mbar
 }
 
-to 'SCD30 altitude compensation' {
-  return (perform (hexToInt '5102') 2)
-}
-
 to 'SCD30 force recalibration value' ppm {
   'SCD30 send' (hexToInt '5204') ppm
 }
 
 to 'SCD30 forced recalibration value' {
   return (perform (hexToInt '5204') 2)
+}
+
+to 'SCD30 set altitude compensation' 'current altitude in meter' {
+  comment 'Setting altitude is disregarded when an ambient pressure is given to the sensor
+via "SCD30 start measuring with ambient pressure"'
+  'SCD30 send' (hexToInt '5102') (v 'current altitude in meter')
+}
+
+to 'SCD30 altitude compensation' {
+  return (perform (hexToInt '5102') 2)
 }
 
 to 'SCD30 isReady?' {
@@ -147,19 +138,18 @@ to 'SCD30 send' command parameter {
   '[sensors:i2cWrite]' (hexToInt '61') cmdList
 }
 
-to 'SCD30 set altitude compensation' 'current altitude in meter' {
-  comment 'Setting altitude is disregarded when an ambient pressure is given to the sensor
-via "SCD30 start measuring with ambient pressure"'
-  'SCD30 send' (hexToInt '5102') (v 'current altitude in meter')
-}
-
 to 'SCD30 set temperture offset' tick {
-  comment 'One tick corresponds to 0.01°C'
-  'SCD30 send' (hexToInt '5403') tick
-}
+  comment 'The on-board RH/T sensor is influenced by thermal self-heating 
+of SCD30 and other electrical components. 
+Design-in alters the thermal properties of SCD30 such that temperature 
+and humidity offsets may occur when operating the sensor in end-customer devices. 
+Compensation of those effects is achievable by writing the temperature offset found 
+in continuous operation of the device into the sensor.
+Temperature offset value is saved in non-volatile memory.
+ The last set value will be used for temperature offset compensation after repowering.
 
-to 'SCD30 soft reset' {
-  'SCD30 send' (hexToInt '3D04') ''
+Format: uint16 Temperature offset, unit [°C x 100], i.e. one tick corresponds to 0.01°C'
+  'SCD30 send' (hexToInt '5403') tick
 }
 
 to 'SCD30 start measuring' {
@@ -188,7 +178,7 @@ to 'SGC30 generate CRC' value {
 }
 
 to perform command size {
-  'SCD30 send' command size
+  'SCD30 send' command ''
   waitMillis 3
   local 'response' (newList size)
   '[sensors:i2cRead]' (hexToInt '61') response
@@ -212,3 +202,6 @@ to 'to float' byte1 byte2 byte3 byte4 {
   return floor
 }
 
+to 'SCD30 soft reset' {
+  'SCD30 send' (hexToInt '3D04') ''
+}
