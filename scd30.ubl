@@ -20,14 +20,6 @@ To calibrate your scd30 quickly (in 2 minutes)
 use the "SCD30 calibrate CO2 to..." block --
 read its comment to get you started.
 
-The measurement interval can be set in seconds >=2s.
-
-if yes it can read all values into the respective variables provided (CO2, temperature, humidity).
-
-The device can be triggered to calibrate its CO2 measurement.
-The CO2 measurement can be adjusted by ambient air pressure or altitude.
-The temperature measurement can be adjusted by a temperature offset as the device creates its own heat.
-
 Credits to José García Yeste, the implementation of 
 the "SDC30 generate CRC" block is taken from his microblocks sgp30 library'
 variables temperature humidity co2 
