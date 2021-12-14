@@ -31,32 +31,32 @@ if you needed more concise temperatures
 you could use the temperature offset and add 0.5°C.'
 variables temperature humidity co2 
 
-  spec ' ' 'SCD30 read loop' 'SCD30 read loop'
-  spec ' ' 'SCD30 display next measurement' 'SCD30 display next measurement'
-	spec ' ' 'SCD30 calibrate' 'SCD30 calibrate CO2 to _ ppm with air pressure _ spec' 'num num' 400 1013
-  spec 'r' 'SCD30 generate CRC' 'SCD30 generate CRC _' 'num'
-  spec 'r' 'SCD30 check CRC' 'SCD30 check CRC _' 'auto'
-  spec ' ' 'SCD30 send' 'SCD30 send command _ parameter _' 'num num'
-	spec 'r' 'SCD30 read uint32' 'SCD30 read uint32 _' 'num'
-	spec 'r' 'SCD30 float32 to decimal' 'SCD30 float32 to decimal _ _ _ _' 'num num num num'
-	spec ' ' 'SCD30 start measuring with ambient pressure' 'SCD30 start measuring with ambient pressure _' 'num' 
-	spec ' ' 'SCD30 start measuring' 'SCD30 start measuring'
-	spec ' ' 'SCD30 stop measuring' 'SCD30 stop measuring'
-	spec ' ' 'SCD30 set measurement interval' 'SCD30 measure every _ seconds' 'num' 2
-	spec 'r' 'SCD30 measurement interval' 'SCD30 measurement interval'
-	spec 'r' 'SCD30 isReady?' 'SCD30 isReady?'
-	spec ' ' 'SCD30 read measurement' 'SCD30 read measurement'
-	spec ' ' 'SCD30 start calibrating' 'SCD30 start calibrating'
-	spec 'r' 'SCD30 is calibrating?' 'SCD30 is calibrating?'
-	spec ' ' 'SCD30 stop calibrating' 'SCD30 stop calibrating'
-	spec ' ' 'SCD30 set forced recalibration value' 'SCD30 set forced recalibration value _' 'num' 400
-	spec 'r' 'SCD30 forced recalibration value' 'SCD30 forced recalibration value'
-	spec ' ' 'SCD30 set temperature offset' 'SCD30 set temperature offset _' 'num' 200
-	spec 'r' 'SCD30 temperature offset' 'SCD30 temperature offset'
-	spec ' ' 'SCD30 set altitude compensation' 'SCD30 set altitude compensation _' 'num'
-	spec 'r' 'SCD30 altitude compensation' 'SCD30 altitude compensation'
-	spec 'r' 'SCD30 firmware' 'SCD30 firmware'
-	spec ' ' 'SCD30 soft reset' 'SCD30 soft reset'
+spec ' ' 'SCD30 read loop' 'SCD30 read loop'
+spec ' ' 'SCD30 display next measurement' 'SCD30 display next measurement'
+spec ' ' 'SCD30 calibrate' 'SCD30 calibrate CO2 to _ ppm with air pressure _ spec' 'num num' 400 1013
+spec 'r' 'SCD30 generate CRC' 'SCD30 generate CRC _' 'num'
+spec 'r' 'SCD30 check CRC' 'SCD30 check CRC _' 'auto'
+spec ' ' 'SCD30 send' 'SCD30 send command _ parameter _' 'num num'
+spec 'r' 'SCD30 read uint32' 'SCD30 read uint32 _' 'num'
+spec 'r' 'SCD30 float32 to decimal' 'SCD30 float32 to decimal _ _ _ _' 'num num num num'
+spec ' ' 'SCD30 start measuring with ambient pressure' 'SCD30 start measuring with ambient pressure _' 'num' 
+spec ' ' 'SCD30 start measuring' 'SCD30 start measuring'
+spec ' ' 'SCD30 stop measuring' 'SCD30 stop measuring'
+spec ' ' 'SCD30 set measurement interval' 'SCD30 measure every _ seconds' 'num' 2
+spec 'r' 'SCD30 measurement interval' 'SCD30 measurement interval'
+spec 'r' 'SCD30 isReady?' 'SCD30 isReady?'
+spec ' ' 'SCD30 read measurement' 'SCD30 read measurement'
+spec ' ' 'SCD30 start calibrating' 'SCD30 start calibrating'
+spec 'r' 'SCD30 is calibrating?' 'SCD30 is calibrating?'
+spec ' ' 'SCD30 stop calibrating' 'SCD30 stop calibrating'
+spec ' ' 'SCD30 set forced recalibration value' 'SCD30 set forced recalibration value _' 'num' 400
+spec 'r' 'SCD30 forced recalibration value' 'SCD30 forced recalibration value'
+spec ' ' 'SCD30 set temperature offset' 'SCD30 set temperature offset _' 'num' 200
+spec 'r' 'SCD30 temperature offset' 'SCD30 temperature offset'
+spec ' ' 'SCD30 set altitude compensation' 'SCD30 set altitude compensation _' 'num'
+spec 'r' 'SCD30 altitude compensation' 'SCD30 altitude compensation'
+spec 'r' 'SCD30 firmware' 'SCD30 firmware'
+spec ' ' 'SCD30 soft reset' 'SCD30 soft reset'
 
 to 'SCD30 altitude compensation' {
   return ('SCD30 read uint32' (hexToInt '5102'))
