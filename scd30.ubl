@@ -1,4 +1,4 @@
-module scd30
+module SCD30
 author 'Markus Gälli'
 version 1 0 
 description 'Implements the interface of the SCD30 environmental sensor 
@@ -31,19 +31,20 @@ if you needed more concise temperatures
 you could use the temperature offset and add 0.5°C.'
 variables temperature humidity co2 
 
-	spec ' ' 'SCD30 read loop' 'SCD30 read loop'
+  spec ' ' 'SCD30 read loop' 'SCD30 read loop'
+  spec ' ' 'SCD30 display next measurement' 'SCD30 display next measurement'
 	spec ' ' 'SCD30 calibrate' 'SCD30 calibrate CO2 to _ ppm with air pressure _ spec' 'num num' 400 1013
-  spec 'r' 'SCD30 generate CRC' 'generate CRC _' 'num'
+  spec 'r' 'SCD30 generate CRC' 'SCD30 generate CRC _' 'num'
+  spec 'r' 'SCD30 check CRC' 'SCD30 check CRC _' 'auto'
   spec ' ' 'SCD30 send' 'SCD30 send command _ parameter _' 'num num'
 	spec 'r' 'SCD30 read uint32' 'SCD30 read uint32 _' 'num'
 	spec 'r' 'SCD30 float32 to decimal' 'SCD30 float32 to decimal _ _ _ _' 'num num num num'
-	spec ' ' 'SCD30 start measuring with ambient pressure' 'SCD30 start measuring with ambient pressure _' 'num'
+	spec ' ' 'SCD30 start measuring with ambient pressure' 'SCD30 start measuring with ambient pressure _' 'num' 
 	spec ' ' 'SCD30 start measuring' 'SCD30 start measuring'
 	spec ' ' 'SCD30 stop measuring' 'SCD30 stop measuring'
 	spec ' ' 'SCD30 set measurement interval' 'SCD30 measure every _ seconds' 'num' 2
 	spec 'r' 'SCD30 measurement interval' 'SCD30 measurement interval'
 	spec 'r' 'SCD30 isReady?' 'SCD30 isReady?'
-	spec 'r' 'SCD30 check CRC' 'SCD30 check CRC _' 'auto'
 	spec ' ' 'SCD30 read measurement' 'SCD30 read measurement'
 	spec ' ' 'SCD30 start calibrating' 'SCD30 start calibrating'
 	spec 'r' 'SCD30 is calibrating?' 'SCD30 is calibrating?'
@@ -61,7 +62,7 @@ to 'SCD30 altitude compensation' {
   return ('SCD30 read uint32' (hexToInt '5102'))
 }
 
-to 'SCD30 calibrate in fresh air' ppm mbar {
+to 'SCD30 calibrate' ppm mbar {
   comment 'Take your SCD30 to fresh air or some known CO2 concentration.
 The default outside CO2 concentration is 400 ppm hence we use 
 this as the default value for "ppm".
@@ -108,8 +109,31 @@ to 'SCD30 check CRC' list {
   return (booleanConstant true)
 }
 
+to 'SCD30 display next measurement' {
+  waitUntil ('SCD30 isReady?')
+  'SCD30 read measurement'
+  sayIt ('[data:join]' 'CO2:' co2 'ppm, temperature:' temperature '°C, humidity:' humidity '%')
+}
+
 to 'SCD30 firmware' {
   return ('SCD30 read uint32' (hexToInt 'D100'))
+}
+
+to 'SCD30 float32 to decimal' byte1 byte2 byte3 byte4 {
+  comment 'Only yields the floor of the decimal at the moment, i.e. no values after the ".".
+  See library description for workarounds.'
+  local 'exponent' 0
+  local 'significand' 0
+  local 'byte2_mod' 0
+  local 'floor' 0
+  exponent = (((byte1 << 1) | (byte2 >> 7)) - 127)
+  byte2_mod = ((1 << 7) | byte2)
+  significand = ((byte2_mod << 16) | ((byte3 << 8) | byte4))
+  floor = (significand >> (23 - exponent))
+  if ((byte1 >> 7) != 0) {
+    floor = (0 - floor)
+  }
+  return floor
 }
 
 to 'SCD30 forced recalibration value' {
@@ -147,12 +171,10 @@ to 'SCD30 measurement interval' {
 }
 
 to 'SCD30 read loop' {
-  'SCD30 start measuring with ambient pressure'
+  'SCD30 start measuring with ambient pressure' 0
   'SCD30 set measurement interval' 2
   forever {
-    waitUntil ('SCD30 isReady?')
-    'SCD30 read measurement'
-    sayIt ('[data:join]' 'CO2:' co2 'ppm, temperature:' temperature '°C, humidity:' humidity '%')
+    'SCD30 display next measurement'
   }
 }
 
@@ -247,22 +269,5 @@ to 'SCD30 stop measuring' {
 
 to 'SCD30 temperature offset' {
   return ('SCD30 read uint32' (hexToInt '5403'))
-}
-
-to 'SCD30 float32 to decimal' byte1 byte2 byte3 byte4 {
-  comment 'Only yields the floor of the decimal at the moment, i.e. no values after the ".".
-  See library description for workarounds.'
-  local 'exponent' 0
-  local 'significand' 0
-  local 'byte2_mod' 0
-  local 'floor' 0
-  exponent = (((byte1 << 1) | (byte2 >> 7)) - 127)
-  byte2_mod = ((1 << 7) | byte2)
-  significand = ((byte2_mod << 16) | ((byte3 << 8) | byte4))
-  floor = (significand >> (23 - exponent))
-  if ((byte1 >> 7) != 0) {
-    floor = (0 - floor)
-  }
-  return floor
 }
 
