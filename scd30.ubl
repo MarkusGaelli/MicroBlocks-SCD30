@@ -23,12 +23,14 @@ read its comment to get you started.
 Credits to José García Yeste, the implementation of 
 the "SDC30 generate CRC" block is taken from his microblocks SGP30 library.
 
-Note that converting float32 to decimal 
+Note that converting float32 to integer 
 only returns the floor of the decimal at the moment.
 Hence we return e.g. 20°C instead of 20.8°C.
-CO2 ppm is in integers anyway, humidity might be 0.5% of,
+CO2 ppm is in integers anyway, 
+humidity might be up to 0.5% off,
 if you needed more concise temperatures
-you could use the temperature offset and add 0.5°C.'
+you could use the temperature offset block
+and add 0.5°C.'
 variables temperature humidity co2 
 
 spec ' ' 'SCD30 read loop' 'SCD30 read loop'
@@ -38,7 +40,7 @@ spec 'r' 'SCD30 generate CRC' 'SCD30 generate CRC _' 'num'
 spec 'r' 'SCD30 check CRC' 'SCD30 check CRC _' 'auto'
 spec ' ' 'SCD30 send' 'SCD30 send command _ parameter _' 'num num'
 spec 'r' 'SCD30 read uint32' 'SCD30 read uint32 _' 'num'
-spec 'r' 'SCD30 float32 to decimal' 'SCD30 float32 to decimal _ _ _ _' 'num num num num'
+spec 'r' 'SCD30 float32 to integer' 'SCD30 float32 to integer _ _ _ _' 'num num num num'
 spec ' ' 'SCD30 start measuring with ambient pressure' 'SCD30 start measuring with ambient pressure _' 'num' 
 spec ' ' 'SCD30 start measuring' 'SCD30 start measuring'
 spec ' ' 'SCD30 stop measuring' 'SCD30 stop measuring'
@@ -119,7 +121,7 @@ to 'SCD30 firmware' {
   return ('SCD30 read uint32' (hexToInt 'D100'))
 }
 
-to 'SCD30 float32 to decimal' byte1 byte2 byte3 byte4 {
+to 'SCD30 float32 to integer' byte1 byte2 byte3 byte4 {
   comment 'Only yields the floor of the decimal at the moment, i.e. no values after the ".".
   See library description for workarounds.'
   local 'exponent' 0
@@ -189,9 +191,9 @@ Make sure that the measurement is completed by reading the data ready status bit
   waitMillis 3
   '[sensors:i2cRead]' (hexToInt '61') all
   if ('SCD30 check CRC' all) {
-    co2 = ('SCD30 float32 to decimal' (at 1 all) (at 2 all) (at 4 all) (at 5 all))
-    temperature = ('SCD30 float32 to decimal' (at 7 all) (at 8 all) (at 10 all) (at 11 all))
-    humidity = ('SCD30 float32 to decimal' (at 13 all) (at 14 all) (at 16 all) (at 17 all))
+    co2 = ('SCD30 float32 to integer' (at 1 all) (at 2 all) (at 4 all) (at 5 all))
+    temperature = ('SCD30 float32 to integer' (at 7 all) (at 8 all) (at 10 all) (at 11 all))
+    humidity = ('SCD30 float32 to integer' (at 13 all) (at 14 all) (at 16 all) (at 17 all))
   }
 }
 
