@@ -16,7 +16,7 @@ The corona epidemic is hitting students hard: They risk isolation at home and in
 Here are a few beginner friendly block based platforms which one coud use for programming the SCD30 together with the respective library:
 
 |Platform / Enduser Name|Organisation|Backend Language|SCD30 driver|
----
+| --- | --- | --- | --- | 
 |[Vittascience](https://en.vittascience.com)|French Ministry of Education|[MicroPyton](https://micropython.org)|[SCD30](https://github.com/vittascience/microbit-libraries/blob/master/scd30.py)|
 |[MakeCode](https://www.microsoft.com/en-us/makecode)|Microsoft|Python/JavaScript|[SCD30](https://github.com/calliope-mini/pxt-SCD30)|
 |[MicroBlocks](https://microblocks.fun)|(diverse/non profit)|[gp](https://gpblocks.org/about/)|[SCD30](https://github.com/MarkusGaelli/MicroBlocks-SCD30/blob/main/scd30.ubl)|
