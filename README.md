@@ -23,7 +23,8 @@ Here are a few beginner friendly block based platforms which one coud use for pr
 
 Only Microblocks lets you interact directly with the blocks, in the other platforms you need to upload them first.
 
-## Library
+## Example
+
 
 
 
